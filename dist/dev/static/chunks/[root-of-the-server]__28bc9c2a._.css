@@ -665,8 +665,12 @@
     height: calc(var(--spacing) * 72);
   }
 
-  .h-\[60px\] {
-    height: 60px;
+  .h-\[56px\] {
+    height: 56px;
+  }
+
+  .h-auto {
+    height: auto;
   }
 
   .h-full {
@@ -679,10 +683,6 @@
 
   .max-h-\[300px\] {
     max-height: 300px;
-  }
-
-  .min-h-\[60px\] {
-    min-height: 60px;
   }
 
   .min-h-screen {
@@ -797,10 +797,6 @@
 
   .items-start {
     align-items: flex-start;
-  }
-
-  .items-stretch {
-    align-items: stretch;
   }
 
   .justify-center {
