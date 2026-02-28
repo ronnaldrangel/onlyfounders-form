@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ChevronRight, Check } from "lucide-react";
@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   nome: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  telefone: z.string().min(10, "Teléfono inválido"),
+  telefone: z.string().min(8, "Teléfono inválido"),
   email: z.string().email("Correo electrónico inválido"),
   genero: z.enum(["masculino", "feminino", "outro"]).optional().refine((val) => val !== undefined, {
     message: "Selecciona un género",
@@ -35,8 +37,8 @@ export const steps = [
     title: "¿Cuál es tu teléfono?",
     subtitle: "Lo necesitamos para contactarte",
     field: "telefone" as const,
-    placeholder: "(00) 00000-0000",
-    type: "tel",
+    placeholder: "+55 11 99999-9999",
+    type: "phone",
   },
   {
     id: 3,
@@ -93,19 +95,14 @@ export default function InleadForm({
     watch,
     setValue,
     reset,
+    control,
   } = methods;
 
   const currentField = steps[currentStep].field;
   const currentValue = watch(currentField);
   const hasError = errors[currentField];
 
-  const formatPhone = (value: string) => {
-    const numbers = value.replace(/\D/g, "");
-    if (numbers.length <= 10) {
-      return numbers.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
-    }
-    return numbers.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-  };
+
 
   const handleNext = async () => {
     const isStepValid = await trigger(currentField);
@@ -237,16 +234,29 @@ export default function InleadForm({
                         </motion.button>
                       ))}
                     </div>
+                  ) : steps[currentStep].type === "phone" ? (
+                    <div className="relative w-full">
+                      <Controller
+                        name="telefone"
+                        control={control}
+                        render={({ field }) => (
+                          <PhoneInput
+                            {...field}
+                            placeholder={steps[currentStep].placeholder}
+                            defaultCountry="BR"
+                            className={cn(
+                              "w-full",
+                              hasError && "[&_input]:border-destructive [&_input]:focus-visible:ring-destructive"
+                            )}
+                            autoFocus
+                          />
+                        )}
+                      />
+                    </div>
                   ) : (
                     <div className="relative">
                       <Input
-                        {...register(currentField, {
-                          onChange: (e) => {
-                            if (steps[currentStep].field === "telefone") {
-                              e.target.value = formatPhone(e.target.value);
-                            }
-                          },
-                        })}
+                        {...register(currentField)}
                         type={steps[currentStep].type}
                         placeholder={steps[currentStep].placeholder}
                         className={`w-full px-5 py-6 text-lg ${
